@@ -6,15 +6,23 @@ s.connect((ip, 50000))
 
 try:
     while True:
-        # Nachricht an Server senden
-        msg = input("Du (Client): ")
-        s.send(msg.encode())
-
-        # Antwort vom Server empfangen
+        # Serverstatus empfangen
         data = s.recv(1024)
         if not data:
-            print("Verbindung beendet.")
             break
-        print("Server:", data.decode())
+        message = data.decode()
+        print("\nServer:", message)
+
+        if "erraten:" in message or "verloren" in message:
+            break
+
+        # Eingabe senden
+        buchstabe = input(">> Dein Buchstabe: ")
+        s.send(buchstabe.encode())
+
+        # Rückmeldung vom Server
+        rueckmeldung = s.recv(1024)
+        print("Server:", rueckmeldung.decode())
+
 finally:
     s.close()
