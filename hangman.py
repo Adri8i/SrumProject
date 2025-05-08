@@ -1,9 +1,18 @@
-
+import csv
 import random
 
+# CSV-Datei öffnen und Wörter lesen
+with open('C:/AdrianKeremPrjkt/hangman_woerter.csv', 'r') as csvfile:
+    reader = csv.reader(csvfile)
+    woerter = [row[0] for row in reader]  # Annahme: Wort steht in der ersten Spalte
+
+# Zufälliges Wort auswählen
+wort = random.choice(woerter)
+print("Zufälliges Wort:", wort)
+
 # Liste möglicher Wörter
-woerter=["python", "spiel", "programm", "schule", "computer"]
-wort=random.choice(woerter)
+# woerter=["python", "spiel", "programm", "schule", "computer"]
+# wort=random.choice(woerter)
 erraten=["_"] * len(wort)
 versuche=6
 benutzte_buchstaben= []
