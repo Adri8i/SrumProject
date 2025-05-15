@@ -1,5 +1,6 @@
 import socket
 import random
+import csv
 
 # Server vorbereiten
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -11,8 +12,14 @@ conn, addr = s.accept()
 print(f"Verbunden mit {addr}")
 
 # Spielvariablen
-woerter = ["python", "spiel", "programm", "schule", "computer"]
+with open('C:\hangman_woerter.csv', 'r') as csvfile: # Pfad zur CSV-Datei anpassung
+    reader = csv.reader(csvfile)
+    woerter = [row[0] for row in reader]  # Annahme: Wort steht in der ersten Spalte
+
+# Zufälliges Wort auswählen
 wort = random.choice(woerter)
+print("Zufälliges Wort:", wort)
+
 erraten = ["_"] * len(wort)
 versuche = 6
 benutzte_buchstaben = []
