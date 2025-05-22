@@ -12,7 +12,7 @@ conn, addr = s.accept()
 print(f"Verbunden mit {addr}")
 
 # Spielvariablen
-with open('C:\hangman_woerter.csv', 'r') as csvfile: # Pfad zur CSV-Datei anpassung
+with open('C:\\hangman_woerter.csv', 'r') as csvfile: # Pfad zur CSV-Datei anpassung
     reader = csv.reader(csvfile)
     woerter = [row[0] for row in reader]  # Annahme: Wort steht in der ersten Spalte
 
