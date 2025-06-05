@@ -1,66 +1,87 @@
 import socket
+import threading
 import random
 import csv
 
-# Server vorbereiten
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("", 50000))
-s.listen(1)
+# --- Spielstatus (global) ---
+with open('C:\\hangman_woerter.csv', 'r') as f:
+    reader = csv.reader(f)
+    woerter = [row[0] for row in reader]
 
-print("Warte auf Verbindung...")
-conn, addr = s.accept()
-print(f"Verbunden mit {addr}")
-
-# Spielvariablen
-with open('C:\\hangman_woerter.csv', 'r') as csvfile: # Pfad zur CSV-Datei anpassung
-    reader = csv.reader(csvfile)
-    woerter = [row[0] for row in reader]  # Annahme: Wort steht in der ersten Spalte
-
-# Zufälliges Wort auswählen
 wort = random.choice(woerter)
-print("Zufälliges Wort:", wort)
-
 erraten = ["_"] * len(wort)
 versuche = 6
-benutzte_buchstaben = []
+benutzte = []
+clients = []
+lock = threading.Lock()  # für sicheren Zugriff
 
-conn.send("Willkommen bei Hangman!".encode())
+def status_text():
+    return f"\nWort: {' '.join(erraten)}\nBenutzte: {', '.join(benutzte)}\nVersuche: {versuche}\n"
 
-try:
-    while versuche > 0 and "_" in erraten:
-        # Spielstand senden
-        status = f"\nWort: {' '.join(erraten)}\nBenutzte Buchstaben: {', '.join(benutzte_buchstaben)}\nVerbleibende Versuche: {versuche}\n>> Rate einen Buchstaben:"
-        conn.send(status.encode())
+def sende_an_alle(nachricht):
+    for c in clients:
+        try:
+            c.send(nachricht.encode())
+        except:
+            clients.remove(c)
 
-        # Eingabe vom Client
-        buchstabe = conn.recv(1024).decode().lower()
-        if not buchstabe:
+def client_thread(conn, addr):
+    global versuche
+
+    print(f"Verbunden mit {addr}")
+    conn.send("Willkommen bei HANGMAN!\n".encode())
+    conn.send(status_text().encode())
+
+    while True:
+        try:
+            daten = conn.recv(1024)
+            if not daten:
+                break
+
+            buchstabe = daten.decode().strip().lower()
+
+            antwort = ""
+            with lock:
+                if len(buchstabe) != 1 or not buchstabe.isalpha():
+                    antwort = "Bitte nur einen Buchstaben.\n"
+                elif buchstabe in benutzte:
+                    antwort = f"'{buchstabe}' wurde schon benutzt.\n"
+                else:
+                    benutzte.append(buchstabe)
+                    if buchstabe in wort:
+                        for i in range(len(wort)):
+                            if wort[i] == buchstabe:
+                                erraten[i] = buchstabe
+                        antwort = f"Richtig: {buchstabe}"
+                    else:
+                        versuche -= 1
+                        antwort = f"Falsch: {buchstabe}"
+
+                # An alle senden
+                sende_an_alle(antwort + "\n" + status_text())
+
+                if "_" not in erraten:
+                    sende_an_alle(f"Gewonnen! Das Wort war: {wort}\n")
+                    break
+                if versuche == 0:
+                    sende_an_alle(f"Verloren! Das Wort war: {wort}\n")
+                    break
+
+        except:
             break
 
-        if len(buchstabe) != 1 or not buchstabe.isalpha():
-            antwort = "Bitte gib nur einen Buchstaben ein."
-        elif buchstabe in benutzte_buchstaben:
-            antwort = "Diesen Buchstaben hast du schon probiert."
-        else:
-            benutzte_buchstaben.append(buchstabe)
-            if buchstabe in wort:
-                for i in range(len(wort)):
-                    if wort[i] == buchstabe:
-                        erraten[i] = buchstabe
-                antwort = "Richtig!"
-            else:
-                versuche -= 1
-                antwort = "Falsch!"
-
-        # Rückmeldung senden
-        conn.send(antwort.encode())
-
-    # Spielende
-    if "_" not in erraten:
-        conn.send(f"\nGlückwunsch! Du hast das Wort erraten: {wort}".encode())
-    else:
-        conn.send(f"\nLeider verloren. Das Wort war: {wort}".encode())
-
-finally:
+    print(f"Spieler {addr} hat verlassen.")
+    clients.remove(conn)
     conn.close()
-    s.close()
+
+# --- Server starten ---
+server = socket.socket()
+server.bind(('', 50000))
+server.listen()
+
+print("Server läuft. Warten auf Verbindungen...")
+
+while True:
+    conn, addr = server.accept()
+    clients.append(conn)
+    threading.Thread(target=client_thread, args=(conn, addr), daemon=True).start()
