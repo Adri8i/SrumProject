@@ -144,14 +144,6 @@ Versuche: 2
 
 ---
 
-## 🧑‍💻 Autor
-
-- **Name:** Dein Name
-- **GitHub:** [github.com/dein-benutzername](https://github.com/dein-benutzername)
-- **Kontakt:** [deine.email@example.com]
-
----
-
 ## 📄 Lizenz
 
 Dieses Projekt steht unter der **MIT-Lizenz**. Du darfst es frei verwenden, verändern und verbreiten.
