@@ -114,7 +114,6 @@ hangman-multiplayer/
 
 ## 🖼️ Beispiel-Screenshot
 
-> *(optional: Screenshot hinzufügen, z. B. unter `screenshots/`)*
 
 ```text
 Wort: _ _ _ _ _ _
