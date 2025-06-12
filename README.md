@@ -67,7 +67,7 @@ hangman-multiplayer/
 1. **Projekt klonen oder herunterladen**
 
    ```bash
-   git clone https://github.com/dein-benutzername/hangman-multiplayer.git
+[   git clone https://github.com/Adri8i/SrumProject.git
    cd hangman-multiplayer
    ```
 
