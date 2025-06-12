@@ -22,6 +22,7 @@ hangman-multiplayer/
 ├── server.py              # Hauptspielserver (verwaltet Spielzustand und Client-Kommunikation)
 ├── client.py              # GUI-Client (Anzeige und Eingabe für Benutzer)
 ├── hangman_woerter.csv    # Wortliste (eine Spalte, ein Wort pro Zeile)
+├── hangman.py             # Grundspiel von hangman
 ├── README.md              # Dokumentation des Projekts
 └── screenshots/           # (optional) Screenshots der GUI
 ```
